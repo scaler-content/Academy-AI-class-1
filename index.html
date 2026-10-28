@@ -1,0 +1,1534 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Class 1 GenAI and First Call</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#fbf9f5; --paper-2:#ffffff; --ink:#1a1a17; --ink-2:#4a4a42; --ink-3:#7a7a70;
+  --rule:#e3ded4; --rule-2:#d2cbbe;
+  --accent:#0f5e55; --accent-2:#0a4a43; --accent-soft:#e6f0ee;
+  --amber:#8a5a00; --amber-soft:#fdf3e0;
+  --violet:#54407f; --violet-soft:#efeaf8;
+  --rose:#8d3a46; --rose-soft:#fbecee;
+  --b1:#0f5e55; --b2:#c98a2e; --b3:#54407f; --b4:#8d3a46; --b5:#3a6b8c;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  --sans:'Inter',system-ui,-apple-system,sans-serif;
+  --serif:'Fraunces',Georgia,serif;
+  --shadow:0 1px 2px rgba(26,26,23,.05),0 8px 24px -12px rgba(26,26,23,.12);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#15171a; --paper-2:#1c1f23; --ink:#eceae4; --ink-2:#b4b2aa; --ink-3:#85837c;
+    --rule:#2b2f34; --rule-2:#3a3f45;
+    --accent:#5fc0b2; --accent-2:#8ad6c9; --accent-soft:#16302d;
+    --amber:#e0a94a; --amber-soft:#2e2515;
+    --violet:#b39ae8; --violet-soft:#241e33;
+    --rose:#e095a0; --rose-soft:#2e1c20;
+    --b1:#5fc0b2; --b2:#e0a94a; --b3:#b39ae8; --b4:#e095a0; --b5:#79b3d6;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.5);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#15171a; --paper-2:#1c1f23; --ink:#eceae4; --ink-2:#b4b2aa; --ink-3:#85837c;
+  --rule:#2b2f34; --rule-2:#3a3f45;
+  --accent:#5fc0b2; --accent-2:#8ad6c9; --accent-soft:#16302d;
+  --amber:#e0a94a; --amber-soft:#2e2515;
+  --violet:#b39ae8; --violet-soft:#241e33;
+  --rose:#e095a0; --rose-soft:#2e1c20;
+  --b1:#5fc0b2; --b2:#e0a94a; --b3:#b39ae8; --b4:#e095a0; --b5:#79b3d6;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:1.5rem}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--sans);font-size:17px;line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ---------- shell ---------- */
+.shell{max-width:1180px;margin:0 auto;padding:0 16px;display:grid;grid-template-columns:230px 1fr;gap:48px}
+@media(max-width:940px){.shell{grid-template-columns:1fr;gap:0}}
+
+aside{
+  position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;
+  padding:40px 0 60px;border-right:1px solid var(--rule);
+  font-size:13.5px;line-height:1.45;
+}
+@media(max-width:940px){aside{display:none}}
+aside .tocHead{font:600 11px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin:0 0 14px}
+aside a{display:flex;gap:8px;align-items:baseline;justify-content:space-between;color:var(--ink-2);text-decoration:none;padding:5px 10px 5px 11px;border-left:2px solid transparent;margin-left:-1px}
+aside a:hover{color:var(--accent);background:var(--accent-soft)}
+aside a.active{color:var(--accent);border-left-color:var(--accent);font-weight:600}
+aside a .mins{flex:0 0 auto;color:var(--ink-3);font:500 11.5px var(--mono)}
+
+main{padding:40px 0 120px;min-width:0;max-width:760px}
+
+/* ---------- masthead ---------- */
+.mast{border-bottom:2px solid var(--ink);padding-bottom:22px;margin-bottom:8px}
+.kicker{font:600 11px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+.mast h1{
+  font-family:var(--serif);font-weight:600;font-size:clamp(2.1rem,5.4vw,3.3rem);
+  line-height:1.04;letter-spacing:-.02em;margin:0 0 16px;
+}
+.mast .meta{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:14px;color:var(--ink-2)}
+.mast .meta b{color:var(--ink);font-weight:600}
+.pill{
+  display:inline-block;padding:3px 9px;border-radius:999px;
+  background:var(--accent-soft);color:var(--accent);
+  font:600 12px var(--sans);border:1px solid color-mix(in srgb,var(--accent) 22%,transparent);
+}
+
+/* ---------- prose ---------- */
+h2{
+  font-family:var(--serif);font-weight:600;font-size:1.72rem;line-height:1.15;
+  letter-spacing:-.015em;margin:3.1rem 0 .3rem;padding-top:1.5rem;
+  border-top:1px solid var(--rule);
+}
+h2:first-of-type{border-top:0}
+h2 .secn{
+  display:block;font:600 11px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:10px;
+}
+h3{font-family:var(--sans);font-weight:650;font-size:1.13rem;letter-spacing:-.005em;margin:2.1rem 0 .4rem}
+h4{font-family:var(--sans);font-weight:650;font-size:1rem;margin:1.5rem 0 .3rem;color:var(--ink-2)}
+p{margin:.85em 0}
+main>p:first-of-type{font-size:1.04em}
+a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:2px}
+strong{font-weight:650}
+hr{border:0;border-top:1px solid var(--rule);margin:2.4rem 0}
+img{max-width:100%;height:auto;border-radius:10px;border:1px solid var(--rule);display:block;margin:1.4rem 0;background:var(--paper-2)}
+code{font-family:var(--mono);font-size:.875em;background:var(--paper-2);border:1px solid var(--rule);border-radius:4px;padding:.1em .35em}
+pre{
+  background:var(--paper-2);border:1px solid var(--rule);border-radius:10px;
+  padding:16px 18px;overflow-x:auto;margin:1.4rem 0;box-shadow:var(--shadow);
+}
+pre code{background:none;border:0;padding:0;font-size:13.2px;line-height:1.6}
+
+table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:14.6px;display:block;overflow-x:auto}
+th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--rule);vertical-align:top}
+thead th{
+  font:600 11.5px var(--sans);letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);
+  border-bottom:1.5px solid var(--rule-2);white-space:nowrap;
+}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:color-mix(in srgb,var(--accent) 4%,transparent)}
+td strong{color:var(--ink)}
+
+ul,ol{padding-left:1.3em;margin:.85em 0}
+li{margin:.3em 0}
+
+/* ---------- labels ---------- */
+.lbl{
+  margin:1.5rem 0;padding:13px 16px 13px 17px;border-radius:0 9px 9px 0;
+  border-left:3px solid var(--rule-2);background:var(--paper-2);font-size:15.5px;line-height:1.6;
+}
+.lbl .tag{
+  display:block;font:600 10.5px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase;
+  margin-bottom:7px;
+}
+.lbl.instructor{border-left-color:var(--violet);background:var(--violet-soft)}
+.lbl.instructor .tag{color:var(--violet)}
+.lbl.ask{border-left-color:var(--accent);background:var(--accent-soft)}
+.lbl.ask .tag{color:var(--accent)}
+.lbl.important{border-left-color:var(--amber);background:var(--amber-soft)}
+.lbl.important .tag{color:var(--amber)}
+.lbl.doubt{border-left-color:var(--b5);background:color-mix(in srgb,var(--b5) 10%,transparent)}
+.lbl.doubt .tag{color:var(--b5)}
+.lbl.question{border-left-color:var(--rose);background:var(--rose-soft)}
+.lbl.question .tag{color:var(--rose)}
+.step{
+  display:flex;gap:13px;margin:.7rem 0;padding:11px 14px;background:var(--paper-2);
+  border:1px solid var(--rule);border-radius:9px;font-size:15.5px;
+}
+.step .n{
+  flex:0 0 auto;width:26px;height:26px;border-radius:50%;background:var(--accent);color:var(--paper-2);
+  display:grid;place-items:center;font:600 13px var(--mono);
+}
+:root[data-theme="dark"] .step .n,
+html:not([data-theme="light"]) .step .n{color:#0d1114}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .step .n{color:#fff}}
+.step .body{flex:1;min-width:0}
+
+/* ---------- quiz ---------- */
+.quiz{
+  margin:2.2rem 0;border:1px solid var(--rule-2);border-radius:13px;overflow:hidden;
+  background:var(--paper-2);box-shadow:var(--shadow);
+}
+.quiz .qhead{
+  display:flex;align-items:center;gap:10px;padding:13px 18px;
+  border-bottom:1px solid var(--rule);background:color-mix(in srgb,var(--accent) 7%,transparent);
+}
+.quiz .qnum{font:600 11px var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--accent)}
+.quiz .qbody{padding:16px 18px 18px}
+.quiz .qtext{font-weight:600;margin:0 0 14px;font-size:16.5px;line-height:1.5}
+.opt{
+  display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;
+  padding:11px 14px;margin:7px 0;border:1px solid var(--rule);border-radius:9px;
+  background:var(--paper);color:var(--ink);font:400 15.5px/1.5 var(--sans);cursor:pointer;
+  transition:border-color .12s,background .12s;
+}
+.opt:hover:not(:disabled){border-color:var(--accent);background:var(--accent-soft)}
+.opt:disabled{cursor:default}
+.opt .k{
+  flex:0 0 auto;width:23px;height:23px;border-radius:5px;border:1px solid var(--rule-2);
+  display:grid;place-items:center;font:600 12.5px var(--mono);color:var(--ink-2);background:var(--paper-2);
+}
+.opt.right{border-color:var(--accent);background:var(--accent-soft)}
+.opt.right .k{background:var(--accent);border-color:var(--accent);color:var(--paper-2)}
+.opt.wrong{border-color:var(--rose);background:var(--rose-soft)}
+.opt.wrong .k{background:var(--rose);border-color:var(--rose);color:var(--paper-2)}
+.verdict{margin:14px 0 0;padding:13px 15px;border-radius:9px;font-size:15px;line-height:1.6;display:none}
+.verdict.show{display:block}
+.verdict .vt{font-weight:650;display:block;margin-bottom:5px}
+.verdict.ok{background:var(--accent-soft);border-left:3px solid var(--accent)}
+.verdict.no{background:var(--rose-soft);border-left:3px solid var(--rose)}
+
+/* ---------- visualizers ---------- */
+.viz{
+  margin:2.3rem 0;border:1px solid var(--rule-2);border-radius:13px;background:var(--paper-2);
+  box-shadow:var(--shadow);overflow:hidden;
+}
+.viz .vhead{padding:14px 18px 12px;border-bottom:1px solid var(--rule)}
+.viz .vk{font:600 10.5px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--b2);margin-bottom:7px}
+.viz .vhead h4{margin:0;font-size:1.05rem;color:var(--ink);font-weight:650}
+.viz .vhead p{margin:5px 0 0;font-size:14px;color:var(--ink-2)}
+.viz .vbody{padding:17px 18px 20px}
+.ctl{display:grid;gap:14px;margin-bottom:17px}
+.ctl.two{grid-template-columns:1fr 1fr}
+.ctl.three{grid-template-columns:repeat(3,1fr)}
+@media(max-width:620px){.ctl.two,.ctl.three{grid-template-columns:1fr}}
+.ctl label{display:block;font:600 12px var(--sans);letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px}
+.ctl label .v{float:right;text-transform:none;letter-spacing:0;font-family:var(--mono);color:var(--accent);font-size:12.5px}
+input[type=range]{width:100%;accent-color:var(--accent);height:22px}
+textarea,select,input[type=number]{
+  width:100%;font-family:var(--mono);font-size:13.5px;padding:9px 11px;
+  border:1px solid var(--rule-2);border-radius:8px;background:var(--paper);color:var(--ink);
+}
+textarea{resize:vertical;min-height:74px;line-height:1.55}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{
+  padding:6px 12px;border:1px solid var(--rule-2);border-radius:7px;background:var(--paper);
+  color:var(--ink-2);font:500 13px var(--sans);cursor:pointer;
+}
+.seg button.on{background:var(--accent);border-color:var(--accent);color:var(--paper-2);font-weight:600}
+
+.toks{display:flex;flex-wrap:wrap;gap:3px;padding:13px;background:var(--paper);border:1px solid var(--rule);border-radius:9px;min-height:54px;align-content:flex-start}
+.tok{font-family:var(--mono);font-size:13px;padding:2px 5px;border-radius:4px;white-space:pre;border:1px solid transparent}
+.tok.c0{background:color-mix(in srgb,var(--b1) 17%,transparent);border-color:color-mix(in srgb,var(--b1) 35%,transparent)}
+.tok.c1{background:color-mix(in srgb,var(--b2) 17%,transparent);border-color:color-mix(in srgb,var(--b2) 35%,transparent)}
+.tok.c2{background:color-mix(in srgb,var(--b3) 17%,transparent);border-color:color-mix(in srgb,var(--b3) 35%,transparent)}
+.tok.c3{background:color-mix(in srgb,var(--b4) 17%,transparent);border-color:color-mix(in srgb,var(--b4) 35%,transparent)}
+.tok.c4{background:color-mix(in srgb,var(--b5) 17%,transparent);border-color:color-mix(in srgb,var(--b5) 35%,transparent)}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:1px;margin-top:15px;background:var(--rule);border:1px solid var(--rule);border-radius:9px;overflow:hidden}
+.stat{background:var(--paper-2);padding:11px 13px}
+.stat .sl{font:600 10.5px var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:4px}
+.stat .sv{font:600 1.22rem/1.15 var(--mono);color:var(--ink);letter-spacing:-.01em}
+.stat .sv.a{color:var(--accent)}
+.stat .sv.w{color:var(--amber)}
+.stat .sn{font-size:11.5px;color:var(--ink-3);margin-top:2px}
+
+.bars{display:grid;gap:9px;margin-top:4px}
+.bar{display:grid;grid-template-columns:132px 1fr auto;gap:11px;align-items:center;font-size:13.5px}
+@media(max-width:560px){.bar{grid-template-columns:96px 1fr auto;gap:8px;font-size:12.5px}}
+.bar .bl{color:var(--ink-2);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar .bt{height:17px;background:color-mix(in srgb,var(--ink) 7%,transparent);border-radius:4px;overflow:hidden}
+.bar .bf{height:100%;border-radius:4px;transition:width .22s ease}
+.bar .bv{font-family:var(--mono);font-size:12.5px;color:var(--ink-2);min-width:52px;text-align:right}
+.bar.hi .bl{color:var(--ink);font-weight:650}
+
+.note{margin-top:15px;padding-top:13px;border-top:1px dashed var(--rule-2);font-size:13.5px;color:var(--ink-3);line-height:1.55}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px;font-size:12.5px;color:var(--ink-2)}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+
+.theme{
+  position:fixed;right:16px;bottom:16px;z-index:50;
+  width:42px;height:42px;border-radius:50%;border:1px solid var(--rule-2);
+  background:var(--paper-2);color:var(--ink-2);cursor:pointer;box-shadow:var(--shadow);
+  font-size:17px;line-height:1;display:grid;place-items:center;
+}
+.theme:hover{color:var(--accent);border-color:var(--accent)}
+.endnote{margin-top:4rem;padding-top:1.3rem;border-top:2px solid var(--ink);font-size:13.5px;color:var(--ink-3)}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <aside><div class="tocHead">On this page</div><nav id="toc"></nav></aside>
+  <main>
+    <header class="mast">
+      <div class="kicker">AI and Agents &middot; Academy Advanced</div>
+      <h1>The GenAI World, and Your First Call in Code</h1>
+      <div class="meta">
+        <span><b>Class 1</b> of 12</span>
+        <span class="pill">114 min + 6 min buffer</span>
+        <span>5 in-class quizzes</span>
+        <span>Free Groq key, no billing details</span>
+      </div>
+    </header>
+    <div id="content"><h2 id="agenda" data-label="Agenda">Agenda</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Section</th>
+<th>Minutes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Why AI is suddenly everywhere, and what you ship by Class 3</td>
+<td>7</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Five words you will hear in every class</td>
+<td>8</td>
+</tr>
+<tr>
+<td></td>
+<td>Quiz 1</td>
+<td>3</td>
+</tr>
+<tr>
+<td>3</td>
+<td>What an LLM does, and what a token is</td>
+<td>14</td>
+</tr>
+<tr>
+<td></td>
+<td>Quiz 2</td>
+<td>3</td>
+</tr>
+<tr>
+<td>4</td>
+<td>The trick that made all of this possible</td>
+<td>8</td>
+</tr>
+<tr>
+<td>5</td>
+<td>No memory, and the context window</td>
+<td>7</td>
+</tr>
+<tr>
+<td>6</td>
+<td>The dials: temperature, top-p, top-k</td>
+<td>8</td>
+</tr>
+<tr>
+<td></td>
+<td>Quiz 3</td>
+<td>3</td>
+</tr>
+<tr>
+<td>7</td>
+<td>The landscape: four families, and the swappable brain</td>
+<td>14</td>
+</tr>
+<tr>
+<td></td>
+<td>Quiz 4</td>
+<td>3</td>
+</tr>
+<tr>
+<td>8</td>
+<td>What people actually build</td>
+<td>7</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Setup: your key and your .env file</td>
+<td>8</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Your first call: six lines and three roles</td>
+<td>14</td>
+</tr>
+<tr>
+<td></td>
+<td>Quiz 5</td>
+<td>3</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Wrap-up and what is next</td>
+<td>4</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Total</strong></td>
+<td><strong>114</strong></td>
+</tr>
+</tbody>
+</table>
+<div class="lbl instructor"><span class="tag">Note for Instructor</span>This class now ends in code. Sections 1 to 8 are the concepts, with a live demo in every block, and Sections 9 and 10 are hands-on: everyone gets a free API key working and makes a real call. That build continues across the next two classes and finishes as a shipped app at the end of Class 3. Say that in the first two minutes, because it changes how the room listens to the theory.</div>
+<div class="lbl instructor"><span class="tag">Note for Instructor</span>The free path is the default path. Section 9 uses Groq, which gives a free API key with no billing details and runs open-weight models. OpenAI is offered as an optional alternative for anyone who already has credit, and the code is identical apart from two lines. Nobody should have to add a payment method to follow this module. If a learner's free key is rate limited mid-class, pair them with a neighbour.</div>
+<div class="lbl instructor"><span class="tag">Note for Instructor</span>Pre-class homework, posted to the batch group two days before: install a code editor and the Python extension, and check that Python runs. The checklist is at the end of Section 11. Do not spend class time on editor installs. Section 9 assumes an editor that already opens and runs a file.</div>
+<h2 id="section-1" data-label="Why AI is suddenly everywhere, and what you ship by Class 3" data-mins="7"><span class="secn">Section 1 &middot; 7 min</span>Why AI is suddenly everywhere, and what you ship by Class 3</h2>
+<p>AI is about seventy years old. So why did it fill your feed only recently?</p>
+<p>Two things changed, and between them they are the reason this class exists.</p>
+<h3>The model became general-purpose</h3>
+<p>Old AI did one task. A spam filter filtered spam and could do nothing else. Today's models write, summarise, translate, answer, and code, from one model. One engine, many uses.</p>
+<h3>The barrier collapsed</h3>
+<p>You do not build the model. The labs spend hundreds of millions doing that, and you call the result over the internet in a few lines of code.</p>
+<p>Something that needed a team and six months a few years ago is now an afternoon for one person. That collapse in cost is the whole opportunity, and it is why this room exists.</p>
+<div class="lbl ask"><span class="tag">Ask Learners</span>What took you a long time last week that an AI could have drafted in thirty seconds?</div>
+<div class="lbl instructor"><span class="tag">Note for Instructor</span>Take two answers, no more. Everyone has one. That gap is what the module teaches them to close, and naming it out loud in the first five minutes is the hook.</div>
+<h3>What you are building</h3>
+<div class="lbl important"><span class="tag">Important</span>Across these first three classes you build and ship one real thing: a web app that takes any URL, reads the page, and gives you a clean summary. Today you make your first call in code. Class 2 is the prompt that makes the summary good. Class 3 is the full app, the safety work, and a public link you can send to anyone.</div>
+<p>Today is not the theory class before the real classes. Today is the first third of the build, with the concepts you need to not be lost in it.</p>
+<h2 id="section-2" data-label="Five words you will hear in every class" data-mins="8"><span class="secn">Section 2 &middot; 8 min</span>Five words you will hear in every class</h2>
+<p>Five terms get used interchangeably in headlines and job posts. They are not the same thing.</p>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>What it is</th>
+<th>The test</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AI</td>
+<td>The umbrella. Any software doing something we would call intelligent</td>
+<td>Your bank's fraud check is AI and writes nothing</td>
+</tr>
+<tr>
+<td>Generative AI</td>
+<td>The slice that creates new content rather than scoring existing content</td>
+<td>It produces a thing that did not exist</td>
+</tr>
+<tr>
+<td>LLM</td>
+<td>A generative model for text. The engine inside ChatGPT, Claude and Gemini</td>
+<td>You give it text, it continues the text</td>
+</tr>
+<tr>
+<td>AI Agent</td>
+<td>An LLM given tools, memory and the ability to choose its next step</td>
+<td>It completes a task instead of answering a question</td>
+</tr>
+<tr>
+<td>Agentic AI</td>
+<td>The paradigm. An agent is a thing you build inside it</td>
+<td>One is a philosophy, the other is a system you can point at</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="Class 1 diagram" src="https://d2beiqkhq929f0.cloudfront.net/public_assets/assets/000/194/280/original/1.png?1777875113" />
+Ask a chatbot to book a flight and it gives you three websites. Ask an agent and it searches, compares, fills the form and reports back.</p>
+<p><img alt="Class 1 diagram" src="https://d2beiqkhq929f0.cloudfront.net/public_assets/assets/000/194/283/original/4.jpeg?1777875713" />
+Important — An LLM is the engine, not the product. ChatGPT is a product. GPT is the model inside it. When a price list or a benchmark names GPT or Claude or Gemini, it is talking about the engine, which is the thing you will call in code today.</p>
+<div class="lbl doubt"><span class="tag">Doubt by Learner</span>Is a chatbot with a web search button an agent?</div>
+<p>Partly. It uses a tool, which is one ingredient. What it does not do is choose its own sequence of steps. One tool call that you triggered is a feature. The test is who decides what happens next.</p>
+<section class="quiz" data-ans="C" data-exp="It writes text, so there is generative AI inside it, and an LLM inside that. But the thing being described is the whole system: tools, memory of your calendar, and it chooses its own next step unprompted. That combination is an agent. Option A names a component, not the system."><div class="qhead"><span class="qnum">In-class quiz 1</span></div><div class="qbody"><p class="qtext">A system reads your inbox each morning, checks your calendar for conflicts, drafts replies, and sends the ones it is confident about. Nobody prompts it. What is the best description?</p><div class="opts"><button class="opt" data-k="A"><span class="k">A</span><span>Generative AI, because it writes the replies</span></button><button class="opt" data-k="B"><span class="k">B</span><span>A Large Language Model</span></button><button class="opt" data-k="C"><span class="k">C</span><span>An AI Agent</span></button><button class="opt" data-k="D"><span class="k">D</span><span>A fine-tuned classification model trained on your past emails, which now predicts the correct reply for each one</span></button></div><div class="verdict"><span class="vt"></span> <span class="vx"></span></div></div></section>
+
+<h2 id="section-3" data-label="What an LLM does, and what a token is" data-mins="14"><span class="secn">Section 3 &middot; 14 min</span>What an LLM does, and what a token is</h2>
+<h3>The autocomplete that read everything</h3>
+<p>Your phone predicts your next word as you text. Now give that autocomplete most of the public internet, and let it predict not one word but thousands in a row.</p>
+<p>That is an LLM. It is the world's most well-read autocomplete.</p>
+<p>This sounds reductive and it is the most useful thing you will learn today. It explains why prompting works, because you are steering the prediction. It explains why models invent things, because a plausible next word is not the same as a true one. It explains why context matters, because the prediction is conditioned entirely on what is in front of it.</p>
+<h3>Tokens are the unit it reads</h3>
+<p>The model does not read words. It reads tokens, chunks of text that average around four characters in English.</p>
+<p>Write "I love programming" and you see three words. The model sees more, because the long word gets chopped into pieces of its own.</p>
+<p><img alt="Class 1 diagram" src="https://d2beiqkhq929f0.cloudfront.net/public_assets/assets/000/189/413/original/6.png?1776076487" />
+Tokens matter for one very practical reason: tokens are the billing unit and tokens are the limit. You will see this on your own API bill in Section 10.</p>
+<h4>Why tokens, and not words or letters</h4>
+<p>The model needs a fixed vocabulary, a list of things it knows. Both obvious choices fail.</p>
+<p>One token per word means millions of entries across every language, plus names, slang and typos, and it breaks the first time it meets a word it has never seen.</p>
+<p>One token per letter means a tiny vocabulary but enormous sequences, which is slow and expensive, and the model has to rebuild spelling from scratch every time.</p>
+<p>Sub-word tokens sit in between. Around a hundred thousand common chunks. Frequent words stay whole, anything rare is assembled from pieces. One fixed vocabulary handles every word in every language, including ones invented tomorrow.</p>
+<h3>Step 1 to Step 3: see your own tokens</h3>
+<div class="lbl instructor"><span class="tag">Note for Instructor</span>Live demo plus follow-along, 6 minutes. Share your screen for the first two steps, then let them do the third. This demo does not depend on any model behaving a certain way, so it works every batch.</div>
+<div class="step"><div class="n">1</div><div class="body">Open https://platform.openai.com/tokenizer and paste a plain English sentence. Read out the word count and the token count.</div></div>
+<div class="step"><div class="n">2</div><div class="body">Paste a block of code into the same box. Tokens per character jump, because indentation, brackets and underscores each become their own token. Code costs more per line than prose.</div></div>
+<div class="step"><div class="n">3</div><div class="body">Paste the same sentence in Hindi or any non-Latin script. The count rises sharply for the same meaning.</div></div>
+<div class="lbl ask"><span class="tag">Ask Learners</span>Which of those three costs most per unit of meaning, and why does that matter if you are building for an Indian user base?</div>
+<div class="lbl doubt"><span class="tag">Doubt by Learner</span>If I write shorter prompts, do I always pay less?</div>
+<p>Less on input, yes. Output tokens usually cost two to four times more than input tokens, so a vague short prompt that triggers a long rambling answer can cost more than a precise longer one. You pay for both halves.</p>
+<section class="quiz" data-ans="A" data-exp="Billing follows token count, and tokenizers are trained mostly on English, so other scripts get chopped into more, smaller pieces for the same words. Option C is true in general but is not what changes between the two languages. Option D describes something the model does not do."><div class="qhead"><span class="qnum">In-class quiz 2</span></div><div class="qbody"><p class="qtext">You are told the same English paragraph costs noticeably more to process when sent in Hindi. What is the reason?</p><div class="opts"><button class="opt" data-k="A"><span class="k">A</span><span>The tokenizer splits the non-Latin script into more tokens for the same meaning</span></button><button class="opt" data-k="B"><span class="k">B</span><span>Hindi is harder for the model to understand, so it thinks for longer</span></button><button class="opt" data-k="C"><span class="k">C</span><span>Output tokens are priced higher than input tokens</span></button><button class="opt" data-k="D"><span class="k">D</span><span>The model translates the text into English internally before predicting, and that translation step is billed on top of your prompt</span></button></div><div class="verdict"><span class="vt"></span> <span class="vx"></span></div></div></section>
+
+<h2 id="section-4" data-label="The trick that made all of this possible" data-mins="8"><span class="secn">Section 4 &middot; 8 min</span>The trick that made all of this possible</h2>
+<p>This is the part that makes people sit up, and it answers a question you should be asking: how do you teach a machine language without an army of people labelling billions of examples?</p>
+<h3>The old way</h3>
+<p>Humans label data by hand. This email is spam. This review is positive. Accurate, and you need millions of labelled examples, so it is slow and expensive.</p>
+<h3>The shortcut</h3>
+<p>Take any sentence from the web. Hide a word. Ask the model to guess it.</p>
+<p>The answer is already sitting in the text, so no human has to label anything. The internet becomes its own teacher, and you get trillions of free practice questions.</p>
+<div class="lbl instructor"><span class="tag">Note for Instructor</span>Do this with the room before you explain it. Put the sentence on screen and ask them to call out the missing word: "The barista handed me a hot cup of ______." Let them answer, then make the point below. The order matters, because the point only lands once they have done it themselves.</div>
+<p>To guess "coffee", you had to quietly know grammar, what a barista is, what is served hot, what fits in a cup, and what usually follows that phrasing. None of that was taught directly. It came out of getting very good at filling in blanks.</p>
+<div class="lbl important"><span class="tag">Important</span>That is the whole secret. Understanding emerges as a side effect of predicting text well. It also explains the failure mode: a model trained to produce plausible text will produce plausible text when it does not know, which is what people call hallucination. Class 3 is largely about designing around that.</div>
+<h2 id="section-5" data-label="No memory, and the context window" data-mins="7"><span class="secn">Section 5 &middot; 7 min</span>No memory, and the context window</h2>
+<p>Here is a fact that quietly explains a great deal of what you are about to build.</p>
+<p>Between calls, the model remembers nothing. Nothing at all. Every chat application you have used creates the illusion of memory by re-sending the conversation every single time.</p>
+<p>That has a limit, and the limit is the context window.</p>
+<p><img alt="Class 1 diagram" src="https://d2beiqkhq929f0.cloudfront.net/public_assets/assets/000/189/416/original/7.png?1776077273" />
+Picture a desk. Everything the model can see has to fit on it: your instructions, the conversation so far, anything you pasted, and the answer it is about to write. A small desk holds a few pages. A large one holds a codebase.</p>
+<p>When you run out, papers fall off the edge, and the model genuinely loses what was at the start.</p>
+<div class="lbl ask"><span class="tag">Ask Learners</span>Who has had a long chat where the model started contradicting something it said twenty messages earlier? That is the desk overflowing.</div>
+<div class="lbl important"><span class="tag">Important</span>A large window is not the same as using it well. Accuracy drops in the middle of a very long context on every model. If something matters, put it near the start or the end, not buried in the middle of a long document.</div>
+<div class="lbl instructor"><span class="tag">Note for Instructor</span>Advanced learner extension, use only if the room is ahead: this is exactly why retrieval exists, and why today's app will send the page text on every single call rather than once. Point forward and move on.</div>
+<h2 id="section-6" data-label="The dials: temperature, top-p, top-k" data-mins="8"><span class="secn">Section 6 &middot; 8 min</span>The dials: temperature, top-p, top-k</h2>
+<p>The model scores every possible next token. These three settings decide how it picks from that list.</p>
+<p><img alt="Class 1 diagram" src="https://d2beiqkhq929f0.cloudfront.net/public_assets/assets/000/189/426/original/8.png?1776078178" />
+Temperature controls how willing it is to pick something other than the most likely token. At 0 it takes the top candidate nearly every time, so the same input gives the same output. At 1 it reaches further down the list, which buys variety and occasionally nonsense.</p>
+<p>Top-k caps the candidate list by count. Top-k of 5 means only the five most likely tokens are considered.</p>
+<p>Top-p caps it by probability mass. Top-p of 0.9 keeps the smallest set of tokens whose probabilities add up to 0.9, which might be two tokens on a confident prediction and forty on an uncertain one. Top-p adapts to how sure the model is. Top-k does not. That is the difference worth remembering.</p>
+<h3>Step 1 and Step 2: watch the probabilities move</h3>
+<div class="lbl instructor"><span class="tag">Note for Instructor</span>Live demo, 4 minutes, using the visualizer rather than a chat window. A chat at 0.3 against 0.7 on a factual task looks nearly identical on camera and the point is lost.</div>
+<div class="step"><div class="n">1</div><div class="body">Open https://andreban.github.io/temperature-topk-visualizer/ and drag temperature from 0 to 1. The bars flatten. Say what that means out loud: more candidates become plausible, so output varies between runs.</div></div>
+<div class="step"><div class="n">2</div><div class="body">Set top-k to 1 and drag temperature again. Nothing changes. That is the lesson: top-k of 1 overrides temperature entirely, because there is only ever one candidate.</div></div>
+<div class="lbl important"><span class="tag">Important</span>This is a real engineering choice and you will make it in Section 10. A support bot wants about 0.2 so answers are consistent. A brainstorming tool wants about 1.0 because variety is the point. Today's summariser wants to be low.</div>
+<section class="quiz" data-ans="D" data-exp="Variety across runs comes from sampling further down the probability list, which is what a higher temperature does. A gives the same names every time. B is unrelated: context size is how much the model can see, not how it chooses. C removes variety entirely by leaving one candidate."><div class="qhead"><span class="qnum">In-class quiz 3</span></div><div class="qbody"><p class="qtext">Your team wants an AI feature that generates five different product name options each time a user clicks the button. Which change gets you that variety?</p><div class="opts"><button class="opt" data-k="A"><span class="k">A</span><span>Lower the temperature towards 0 so the model follows the instruction more reliably</span></button><button class="opt" data-k="B"><span class="k">B</span><span>Increase the context window so the model has more room to be creative</span></button><button class="opt" data-k="C"><span class="k">C</span><span>Cap top-k at 1 so the model commits to a decision</span></button><button class="opt" data-k="D"><span class="k">D</span><span>Raise the temperature</span></button></div><div class="verdict"><span class="vt"></span> <span class="vx"></span></div></div></section>
+
+<h2 id="section-7" data-label="The landscape: four families, and the swappable brain" data-mins="14"><span class="secn">Section 7 &middot; 14 min</span>The landscape: four families, and the swappable brain</h2>
+<p>Specific model names go stale in weeks. Any list of the best model you memorise today will be wrong before this module ends. So learn the structure, which does not change, and where to look up today's names.</p>
+<h3>The four families</h3>
+<table>
+<thead>
+<tr>
+<th>Family</th>
+<th>Who makes it</th>
+<th>Known for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GPT</td>
+<td>OpenAI</td>
+<td>Broad capability, the largest ecosystem</td>
+</tr>
+<tr>
+<td>Claude</td>
+<td>Anthropic</td>
+<td>Instruction following, long documents, code review</td>
+</tr>
+<tr>
+<td>Gemini</td>
+<td>Google DeepMind</td>
+<td>Very large context, multimodal including video</td>
+</tr>
+<tr>
+<td>Open weights</td>
+<td>Meta, Mistral, DeepSeek, Alibaba and others</td>
+<td>You can download it and run it yourself</td>
+</tr>
+</tbody>
+</table>
+<h3>Fast models and reasoning models</h3>
+<p>This is the most important split in the landscape right now.</p>
+<p>A fast model answers in one pass. It reads your prompt and starts writing immediately.</p>
+<p>A reasoning model spends output tokens on itself first, working through the problem before it answers. More tokens, more seconds, better results on anything with several dependent steps.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Fast model</th>
+<th>Reasoning model</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Latency</td>
+<td>Under a second to a few</td>
+<td>Several seconds to minutes</td>
+</tr>
+<tr>
+<td>Cost</td>
+<td>Low</td>
+<td>Several times higher, thinking tokens are billed</td>
+</tr>
+<tr>
+<td>Good at</td>
+<td>Classification, extraction, formatting, summarising</td>
+<td>Multi-step maths, planning, debugging</td>
+</tr>
+</tbody>
+</table>
+<p>The split used to be a choice between two different models. On the newer open-weight models it is increasingly a dial on one model: you send a reasoning effort of low, medium or high and pay for the thinking you asked for.</p>
+<p>The model you will use today, gpt-oss, works exactly that way. Summarising a page has no dependent steps, so you keep the effort low and it behaves like a fast model. That is not a budget compromise, it is matching the thinking to the job. You will set that dial in Class 2, where the app needs it; today's call stays minimal on purpose.</p>
+<h3>The brain is swappable</h3>
+<p>Here is the thing that makes all of this practical, and you will see it with your own eyes in Section 10.</p>
+<p>Changing which company's model your app runs on is a two-line change. Same library, same code, same message format. You point the client at a different address and name a different model.</p>
+<div class="lbl important"><span class="tag">Important</span>That is the real reason to learn the structure rather than the names. You are not marrying a vendor. If a model gets better, cheaper, or is retired, you move, and your app does not care.</div>
+<h3>How to read a leaderboard</h3>
+<table>
+<thead>
+<tr>
+<th>Source</th>
+<th>The question it answers</th>
+<th>Watch out for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LMArena</td>
+<td>Which model do people prefer in a blind chat</td>
+<td>Rewards pleasant formatting, not correctness</td>
+</tr>
+<tr>
+<td>Artificial Analysis</td>
+<td>Cost, speed and capability on one chart</td>
+<td>Snapshot pricing, verify with the provider</td>
+</tr>
+<tr>
+<td>SWE-bench Verified</td>
+<td>Can it fix real issues in real repositories</td>
+<td>Coding only, and scaffolding affects the score</td>
+</tr>
+</tbody>
+</table>
+<div class="step"><div class="n">1</div><div class="body">Open Artificial Analysis live and sort by cost. Point at the spread between the cheapest and the most expensive usable model. It is usually more than twenty times.</div></div>
+<div class="step"><div class="n">2</div><div class="body">Switch to the quality axis. The top is crowded and close together, while cost is spread wide. Say the conclusion plainly: at the top, models are near each other in capability and far apart in price.</div></div>
+<div class="lbl important"><span class="tag">Important</span>Benchmarks get gamed and contaminated. Treat a leaderboard as a shortlist, not a verdict. The real test is your own task on two or three candidates.</div>
+<h3>Fast-changing facts: verify before each batch</h3>
+<div class="lbl instructor"><span class="tag">Note for Instructor</span>Re-check these the week before you teach and update them in place. Nothing else in this script depends on them.</div>
+<ul>
+<li>The current flagship and current fast model in each family</li>
+<li>That <code>openai/gpt-oss-120b</code> is still served on Groq. Model IDs get retired with little notice, and a retired ID fails every learner's very first call</li>
+<li>Whether Groq's free tier still covers a class of this size</li>
+<li>Approximate per-million-token prices for one fast and one reasoning model</li>
+<li>That the tokenizer and visualizer links still load</li>
+</ul>
+<section class="quiz" data-ans="B" data-exp="Reasoning helps when a task has several steps that depend on each other. Pulling one field out of a short piece of text has no such structure, so the extra thinking tokens buy nothing. That is the argument for matching the thinking to the job, and why today&#x27;s summariser keeps its reasoning effort low."><div class="qhead"><span class="qnum">In-class quiz 4</span></div><div class="qbody"><p class="qtext">A team moves their whole product onto a reasoning model, including a feature that extracts the delivery address from a pasted order confirmation. Costs rise sharply. What happened to the quality of that extraction feature?</p><div class="opts"><button class="opt" data-k="A"><span class="k">A</span><span>It improved, because reasoning models are more capable across the board</span></button><button class="opt" data-k="B"><span class="k">B</span><span>It stayed about the same, because the task has no dependent steps to reason through</span></button><button class="opt" data-k="C"><span class="k">C</span><span>It got worse, because reasoning models overthink simple inputs and introduce errors a fast model would not have made</span></button><button class="opt" data-k="D"><span class="k">D</span><span>It cannot be compared, since the two kinds of model produce fundamentally different output formats</span></button></div><div class="verdict"><span class="vt"></span> <span class="vx"></span></div></div></section>
+
+<h2 id="section-8" data-label="What people actually build" data-mins="7"><span class="secn">Section 8 &middot; 7 min</span>What people actually build</h2>
+<h3>Foundation models and more senses</h3>
+<p>Modern models are not only text. The same idea extended to images, audio and video gives you a foundation model: one general-purpose engine you adapt to many jobs. Show it a photo and ask a question about it. Speak to it and it speaks back.</p>
+<h3>The eight things people build</h3>
+<p>Almost every AI product you have seen is one of these.</p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>What it is</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Coding</td>
+<td>Write, explain and fix code. The biggest use case today</td>
+<td>Copilot, Cursor</td>
+</tr>
+<tr>
+<td>Writing</td>
+<td>Emails, posts, marketing copy, rewriting</td>
+<td>Notion AI</td>
+</tr>
+<tr>
+<td>Image and video</td>
+<td>Generate and edit visual content</td>
+<td>Midjourney</td>
+</tr>
+<tr>
+<td>Education</td>
+<td>Tutors that explain anything at your pace</td>
+<td>Khanmigo</td>
+</tr>
+<tr>
+<td>Chatbots</td>
+<td>Support, sales and assistants that converse</td>
+<td>Intercom Fin</td>
+</tr>
+<tr>
+<td>Information aggregation</td>
+<td>Summarise and search across mountains of text</td>
+<td>This module's project</td>
+</tr>
+<tr>
+<td>Data organisation</td>
+<td>Tag, sort and structure messy information</td>
+<td>Classification systems</td>
+</tr>
+<tr>
+<td>Workflow and agents</td>
+<td>AI that takes multi-step actions for you</td>
+<td>Classes 6 to 9</td>
+</tr>
+</tbody>
+</table>
+<div class="lbl important"><span class="tag">Important</span>Underneath, they are all the same shape: connect to a model, give it the right context, get a useful answer, wrap it in an interface. Learn that once and all eight become buildable. The project you start today is the sixth one.</div>
+<div class="lbl ask"><span class="tag">Ask Learners</span>Which of those eight is closest to something you would actually use at work?</div>
+<h2 id="section-9" data-label="Setup: your key and your .env file" data-mins="8"><span class="secn">Section 9 &middot; 8 min</span>Setup: your key and your .env file</h2>
+<div class="lbl instructor"><span class="tag">Note for Instructor</span>Hands-on, 8 minutes. Everyone does this at the same time. Editor and Python were pre-class homework; this section is only the key and the file.</div>
+<p>An API key is a password that lets your code use somebody's model. We are using Groq, which gives one away free, with no billing details, and serves open-weight models very fast.</p>
+<div class="step"><div class="n">1</div><div class="body">Go to https://console.groq.com and sign in. Open API Keys and create a key. Copy it immediately, because the site shows it once.</div></div>
+<div class="step"><div class="n">2</div><div class="body">Make a folder for the project. Inside it, create a file named exactly <code>.env</code>, with the leading dot. Put your key in it.</div></div>
+<p>The .env file holds your secret so it never appears in the code you share. That is the only thing it does.</p>
+<pre><code class="language-text"># .env  --  this is not Python. It is a plain text file named .env
+# Keep it private. Add it to .gitignore so it never reaches GitHub.
+
+GROQ_API_KEY=gsk_your_key_goes_here
+</code></pre>
+<div class="step"><div class="n">3</div><div class="body">Install the three packages you need today.</div></div>
+<pre><code class="language-python"># Run this once, in your editor's terminal, without the leading !
+# In a notebook, keep the ! so it runs as a shell command.
+
+!pip install openai python-dotenv
+</code></pre>
+<div class="lbl important"><span class="tag">Important</span>Never paste a key into code you share, and never commit one to GitHub. Bots scan public repositories for keys within minutes, and a leaked key spends real money. The key lives in .env, and .env goes in .gitignore. This is the one habit from today that genuinely saves people.</div>
+<div class="lbl doubt"><span class="tag">Doubt by Learner</span>Why is a file called .env invisible in my folder?</div>
+<p>Files starting with a dot are hidden by default on Mac and Linux. Your editor shows it. In Finder, press Command, Shift and full stop to reveal hidden files.</p>
+<div class="lbl instructor"><span class="tag">Note for Instructor</span>The most common failure here is a key pasted with a trailing space, or the file saved as <code>.env.txt</code>. Both produce the same confusing error. Check those two things first when someone is stuck.</div>
+<h2 id="section-10" data-label="Your first call: six lines and three roles" data-mins="14"><span class="secn">Section 10 &middot; 14 min</span>Your first call: six lines and three roles</h2>
+<div class="lbl instructor"><span class="tag">Note for Instructor</span>Hands-on, 14 minutes, and this is where the class lands. Everyone runs this and sees a reply. Do not move on until most of the room has output on screen.</div>
+<h3>What this code does</h3>
+<p>Four things, in order. It loads your key from .env. It creates a client, which is the object that knows how to talk to the model. It sends a list of messages. It prints the reply out of the response.</p>
+<p>That is the whole shape of every AI application you will ever write, including the one in Class 3.</p>
+<pre><code class="language-python"># first_call.py
+# Loads the key, creates a client, sends messages, prints the reply.
+
+import os
+from dotenv import load_dotenv
+from openai import OpenAI
+
+load_dotenv()                    # reads .env so the key is available
+
+key = os.getenv(&quot;GROQ_API_KEY&quot;)
+if not key:
+    raise SystemExit(
+        &quot;No GROQ_API_KEY found.\n&quot;
+        &quot;Check three things, in this order:\n&quot;
+        &quot;  1. The file is named exactly .env, not .env.txt\n&quot;
+        &quot;  2. It sits in the same folder as this file\n&quot;
+        &quot;  3. The line reads GROQ_API_KEY=gsk_... with no spaces around the =&quot;
+    )
+
+# The same library talks to Groq. Only these two lines name a provider.
+client = OpenAI(
+    api_key=key,
+    base_url=&quot;https://api.groq.com/openai/v1&quot;,
+)
+
+response = client.chat.completions.create(
+    model=&quot;openai/gpt-oss-120b&quot;,
+    temperature=0.2,             # low, because we want consistency
+    messages=[
+        {&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: &quot;You are a witty travel guide.&quot;},
+        {&quot;role&quot;: &quot;user&quot;,   &quot;content&quot;: &quot;Suggest one thing to do in Bangalore.&quot;},
+    ],
+)
+
+print(response.choices[0].message.content)
+</code></pre>
+<div class="lbl ask"><span class="tag">Ask Learners</span>Who has a reply on screen? Put a yes in the chat.</div>
+<h3>The three roles</h3>
+<p>That messages list is the entire grammar of chat models. There are only three roles.</p>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Who it is</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>system</td>
+<td>You, the builder</td>
+<td>Sets the personality and the rules. Applies throughout</td>
+</tr>
+<tr>
+<td>user</td>
+<td>The person using your app</td>
+<td>The actual request</td>
+</tr>
+<tr>
+<td>assistant</td>
+<td>The model</td>
+<td>Its reply. To continue a conversation, you append it and resend the whole list</td>
+</tr>
+</tbody>
+</table>
+<p>That last row is Section 5 made concrete. The model has no memory, so a conversation is you re-sending the entire list every time. Nothing else is happening.</p>
+<div class="lbl instructor"><span class="tag">Note for Instructor</span>Live demo, 3 minutes. Change the system line to something silly, like a pirate or a tax inspector, and re-run. Same code, same model, different product. That is the Class 2 hook, so say it: next class is entirely about writing that one line well.</div>
+<h3>The swappable brain, proved</h3>
+<p>Change two lines and the same code runs on a different company's model.</p>
+<pre><code class="language-python"># Same file, same messages, different provider.
+# To use OpenAI instead of Groq, change only these two things:
+
+client = OpenAI(
+    api_key=os.getenv(&quot;OPENAI_API_KEY&quot;),   # a different key in .env
+    # no base_url line at all -- OpenAI is the library's default
+)
+
+# ...and name one of their models instead:
+#     model=&quot;gpt-4o-mini&quot;
+</code></pre>
+<div class="lbl important"><span class="tag">Important</span>Nothing else moves. Same library, same message list, same way of reading the reply. This is why Section 7 taught families rather than names. OpenAI needs billing credit, so stay on Groq today unless you already have it.</div>
+<div class="lbl doubt"><span class="tag">Doubt by Learner</span>If the code is the same, what am I actually choosing between?</div>
+<p>Price, speed, context size and character. The code is the easy part. Picking well is the skill, and it is what Section 7 was for.</p>
+<section class="quiz" data-ans="C" data-exp="The model has no memory between calls. A conversation only exists because you re-send the whole message list every time, so a follow-up sent on its own arrives with no history attached. B is implausible at two short messages. D confuses the system role, which sets behaviour, with the history that carries the conversation."><div class="qhead"><span class="qnum">In-class quiz 5</span></div><div class="qbody"><p class="qtext">You build a chat feature. A user asks a question, the model answers, and the user then asks a follow-up that depends on the first answer. The model replies as if the first exchange never happened. What is wrong?</p><div class="opts"><button class="opt" data-k="A"><span class="k">A</span><span>The temperature is too low, so the model is giving a rigid answer</span></button><button class="opt" data-k="B"><span class="k">B</span><span>The context window is too small for two messages</span></button><button class="opt" data-k="C"><span class="k">C</span><span>The previous messages were not included in the list sent with the second request</span></button><button class="opt" data-k="D"><span class="k">D</span><span>The system role was left empty, and without it the model cannot track a conversation</span></button></div><div class="verdict"><span class="vt"></span> <span class="vx"></span></div></div></section>
+
+<h2 id="section-11" data-label="Wrap-up and what is next" data-mins="4"><span class="secn">Section 11 &middot; 4 min</span>Wrap-up and what is next</h2>
+<h3>What you can do now</h3>
+<p>You can explain what the model is doing when you press enter: predicting the next token from whatever is on its desk.</p>
+<p>You can say why it can do that at all, which is self-supervision, and why that same trick produces confident wrong answers.</p>
+<p>You can reason about tokens and context as the two hard limits, and as the bill.</p>
+<p>You can pick a model deliberately: the family for its character, fast or reasoning for the shape of the task.</p>
+<p>And you have made a real API call, with a key you own, from code on your machine.</p>
+<h3>Where this goes</h3>
+<table>
+<thead>
+<tr>
+<th>Class</th>
+<th>What you add</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1, today</td>
+<td>Your first call. A key, a client, three roles</td>
+</tr>
+<tr>
+<td>2</td>
+<td>The prompt. You write the system prompt that makes the summary good</td>
+</tr>
+<tr>
+<td>3</td>
+<td>The whole app. Scraper, interface, safety, and a public link</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="Class 1 diagram" src="https://d2beiqkhq929f0.cloudfront.net/public_assets/assets/000/196/295/original/img7.png?1778585288" /></p>
+<h3>The habit to take away</h3>
+<p>When a new model launches next month, you will not need to relearn anything. Ask the same questions: which family, how much thinking does this task need, what does it cost at my volume, and is my key still in .env where it belongs.</p>
+<h3>Pre-class checklist for Class 2</h3>
+<div class="lbl instructor"><span class="tag">Note for Instructor</span>Post this to the batch group. It is not class time.</div>
+<div class="step"><div class="n">1</div><div class="body">Keep today's folder and your .env file. Class 2 builds on them.</div></div>
+<div class="step"><div class="n">2</div><div class="body">Run <code>first_call.py</code> once more before class and confirm you still get a reply.</div></div>
+<div class="step"><div class="n">3</div><div class="body">If you could not get a key working today, message the group. Do not arrive at Class 2 stuck on setup.</div></div>
+<h3>Resources used in this class</h3>
+<table>
+<thead>
+<tr>
+<th>Resource</th>
+<th>URL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tokenizer</td>
+<td>https://platform.openai.com/tokenizer</td>
+</tr>
+<tr>
+<td>Temperature and top-k visualizer</td>
+<td>https://andreban.github.io/temperature-topk-visualizer/</td>
+</tr>
+<tr>
+<td>Context window visualizer</td>
+<td>https://context-windows.damien-henry.com/</td>
+</tr>
+<tr>
+<td>Model cost, speed and quality comparison</td>
+<td>https://artificialanalysis.ai/</td>
+</tr>
+<tr>
+<td>Blind preference leaderboard</td>
+<td>https://lmarena.ai/</td>
+</tr>
+<tr>
+<td>Free API keys, used in Section 9</td>
+<td>https://console.groq.com</td>
+</tr>
+</tbody>
+</table></div>
+  </main>
+</div>
+
+<button class="theme" id="themeBtn" title="Switch light and dark" aria-label="Switch light and dark">&#9682;</button>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   0. theme
+   ============================================================ */
+try{
+  var saved=localStorage.getItem("c1-theme");
+  if(saved) document.documentElement.setAttribute("data-theme",saved);
+}catch(e){}
+document.getElementById("themeBtn").addEventListener("click",function(){
+  var cur=document.documentElement.getAttribute("data-theme");
+  if(!cur){
+    cur=window.matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light";
+  }
+  var next=cur==="dark"?"light":"dark";
+  document.documentElement.setAttribute("data-theme",next);
+  try{localStorage.setItem("c1-theme",next);}catch(e){}
+});
+
+/* ============================================================
+   1. content is pre-rendered at build time; bind the quizzes
+   ============================================================ */
+var host=document.getElementById("content");
+
+Array.prototype.slice.call(host.querySelectorAll(".quiz")).forEach(function(box){
+  var ans=box.dataset.ans, exp=box.dataset.exp;
+  var verdict=box.querySelector(".verdict");
+  var opts=Array.prototype.slice.call(box.querySelectorAll(".opt"));
+  opts.forEach(function(btn){
+    btn.addEventListener("click",function(){
+      var correct=btn.dataset.k===ans;
+      opts.forEach(function(b){
+        b.disabled=true;
+        if(b.dataset.k===ans) b.classList.add("right");
+        else if(b===btn) b.classList.add("wrong");
+      });
+      verdict.className="verdict show "+(correct?"ok":"no");
+      verdict.querySelector(".vt").textContent=correct
+        ? "Correct. Answer "+ans+"."
+        : "Not that one. The answer is "+ans+".";
+      verdict.querySelector(".vx").textContent=exp;
+    });
+  });
+});
+
+/* ============================================================
+   4. helpers
+   ============================================================ */
+function el(tag,cls,html){
+  var n=document.createElement(tag);
+  if(cls)n.className=cls;
+  if(html!=null)n.innerHTML=html;
+  return n;
+}
+function viz(kicker,title,sub,bodyHTML){
+  var s=el("section","viz");
+  s.innerHTML='<div class="vhead"><div class="vk">'+kicker+'</div><h4>'+title+'</h4><p>'+sub+'</p></div>'+
+              '<div class="vbody">'+bodyHTML+'</div>';
+  return s;
+}
+// insert a node after the heading whose text starts with `prefix`
+function afterHeading(prefix,node){
+  var hs=host.querySelectorAll("h2,h3");
+  for(var i=0;i<hs.length;i++){
+    if(hs[i].textContent.trim().toLowerCase().indexOf(prefix.toLowerCase())===0){
+      var anchor=hs[i], next=anchor.nextElementSibling;
+      // slip past the first paragraph so the teaching line comes first
+      if(next&&next.tagName==="P") anchor=next;
+      anchor.after(node);
+      return true;
+    }
+  }
+  host.appendChild(node);
+  return false;
+}
+function fmtMoney(v){
+  if(v>=1000) return "$"+Math.round(v).toLocaleString();
+  if(v>=1) return "$"+v.toFixed(2);
+  return "$"+v.toFixed(4);
+}
+
+/* ============================================================
+   VISUALIZER 1 - tokenizer
+   ============================================================ */
+(function(){
+  var SAMPLES={
+    prose:"I love programming, and the model does not read words the way you do.",
+    code:"def estimate_tokens(text):\n    return max(1, round(len(text) / 4))",
+    hindi:"\u092E\u0941\u091D\u0947 \u092A\u094D\u0930\u094B\u0917\u094D\u0930\u093E\u092E\u093F\u0902\u0917 \u092C\u0939\u0941\u0924 \u092A\u0938\u0902\u0926 \u0939\u0948\u0964"
+  };
+
+  var html=
+    '<div class="seg" style="margin-bottom:12px">'+
+      '<button data-s="prose" class="on">English prose</button>'+
+      '<button data-s="code">Python code</button>'+
+      '<button data-s="hindi">Hindi</button>'+
+    '</div>'+
+    '<textarea id="tkIn" spellcheck="false"></textarea>'+
+    '<div class="ctl two" style="margin:14px 0 15px">'+
+      '<div><label>Requests per day <span class="v" id="tkRV"></span></label>'+
+        '<input type="range" id="tkR" min="100" max="200000" step="100" value="10000"></div>'+
+      '<div><label>Answer length, tokens <span class="v" id="tkOV"></span></label>'+
+        '<input type="range" id="tkO" min="50" max="2000" step="50" value="300"></div>'+
+    '</div>'+
+    '<div class="toks" id="tkOut"></div>'+
+    '<div class="stats">'+
+      '<div class="stat"><div class="sl">Characters</div><div class="sv" id="tkC">0</div></div>'+
+      '<div class="stat"><div class="sl">Words</div><div class="sv" id="tkW">0</div></div>'+
+      '<div class="stat"><div class="sl">Tokens</div><div class="sv a" id="tkT">0</div></div>'+
+      '<div class="stat"><div class="sl">Chars per token</div><div class="sv" id="tkCT">0</div>'+
+        '<div class="sn">lower means pricier text</div></div>'+
+    '</div>'+
+    '<div class="bars" style="margin-top:16px" id="tkBars"></div>'+
+    '<div class="note">Approximate tokenizer, built to show the effect rather than to match a provider byte for byte. '+
+    'Monthly cost assumes this prompt on every request at the public per-million-token rates for a frontier and a fast tier.</div>';
+
+  var v=viz("Visualizer 1","See your own tokens",
+    "Switch between prose, code and a non-Latin script. Watch characters per token fall, and the monthly bill rise for the same meaning.",html);
+  afterHeading("Tokens are the unit it reads",v);
+
+  var tkIn=v.querySelector("#tkIn"), out=v.querySelector("#tkOut"), bars=v.querySelector("#tkBars");
+  var rng=v.querySelector("#tkR"), orn=v.querySelector("#tkO");
+
+  function tokenize(s){
+    var toks=[],i=0;
+    while(i<s.length){
+      var ch=s[i];
+      // non-Latin script: roughly one token per character, often more
+      if(ch.charCodeAt(0)>0x2FF){ toks.push(ch); i++; continue; }
+      if(/\s/.test(ch)){
+        // whitespace attaches to the following word, newlines stand alone
+        if(ch==="\n"){ toks.push("\\n"); i++; continue; }
+        var j=i; while(j<s.length&&/[ \t]/.test(s[j])) j++;
+        if(j-i>1){ toks.push(s.slice(i,j)); i=j; continue; }
+        // single space joins the next word chunk
+        var k=j; while(k<s.length&&/[A-Za-z0-9]/.test(s[k])) k++;
+        var word=s.slice(j,k);
+        if(!word){ toks.push(" "); i=j; continue; }
+        pushWord(" "+word,toks); i=k; continue;
+      }
+      if(/[A-Za-z0-9]/.test(ch)){
+        var e=i; while(e<s.length&&/[A-Za-z0-9]/.test(s[e])) e++;
+        pushWord(s.slice(i,e),toks); i=e; continue;
+      }
+      toks.push(ch); i++; // punctuation and symbols are their own token
+    }
+    return toks;
+  }
+  function pushWord(w,toks){
+    var lead=w[0]===" "?" ":"";
+    var body=lead?w.slice(1):w;
+    if(body.length<=5){ toks.push(w); return; }
+    // long words break into sub-word pieces of about four characters
+    var first=true;
+    for(var p=0;p<body.length;p+=4){
+      var piece=body.slice(p,p+4);
+      toks.push(first?lead+piece:piece);
+      first=false;
+    }
+  }
+
+  function render(){
+    var s=tkIn.value;
+    var toks=tokenize(s);
+    var n=toks.length;
+    out.innerHTML="";
+    toks.slice(0,420).forEach(function(t,i){
+      var span=el("span","tok c"+(i%5));
+      span.textContent=t==="\\n"?"\u21B5":t;
+      out.appendChild(span);
+    });
+    if(toks.length>420) out.appendChild(el("span","tok","+"+(toks.length-420)+" more"));
+
+    var words=(s.trim().match(/\S+/g)||[]).length;
+    v.querySelector("#tkC").textContent=s.length.toLocaleString();
+    v.querySelector("#tkW").textContent=words.toLocaleString();
+    v.querySelector("#tkT").textContent=n.toLocaleString();
+    v.querySelector("#tkCT").textContent=n?(s.length/n).toFixed(1):"0";
+
+    var req=+rng.value, outTok=+orn.value;
+    v.querySelector("#tkRV").textContent=req.toLocaleString()+"/day";
+    v.querySelector("#tkOV").textContent=outTok+" tok";
+
+    var tiers=[
+      {name:"Frontier tier",pin:3.00,pout:15.00,c:"var(--b4)"},
+      {name:"Mid tier",pin:1.25,pout:5.00,c:"var(--b3)"},
+      {name:"Fast tier",pin:0.20,pout:0.80,c:"var(--b1)"}
+    ];
+    var vals=tiers.map(function(t){
+      return req*30*(n/1e6*t.pin + outTok/1e6*t.pout);
+    });
+    var max=Math.max.apply(null,vals)||1;
+    bars.innerHTML=tiers.map(function(t,i){
+      return '<div class="bar'+(i===2?' hi':'')+'">'+
+        '<div class="bl">'+t.name+'</div>'+
+        '<div class="bt"><div class="bf" style="width:'+(vals[i]/max*100)+'%;background:'+t.c+'"></div></div>'+
+        '<div class="bv">'+fmtMoney(vals[i])+'</div></div>';
+    }).join("")+'<div class="note" style="margin-top:4px;border:0;padding:0">Estimated spend per month at this prompt size.</div>';
+  }
+
+  Array.prototype.slice.call(v.querySelectorAll(".seg button")).forEach(function(b){
+    b.addEventListener("click",function(){
+      v.querySelectorAll(".seg button").forEach(function(x){x.classList.remove("on");});
+      b.classList.add("on");
+      tkIn.value=SAMPLES[b.dataset.s];
+      render();
+    });
+  });
+  tkIn.addEventListener("input",render);
+  rng.addEventListener("input",render);
+  orn.addEventListener("input",render);
+  tkIn.value=SAMPLES.prose;
+  render();
+})();
+
+/* ============================================================
+   VISUALIZER 2 - context window desk
+   ============================================================ */
+(function(){
+  var html=
+    '<div class="ctl three">'+
+      '<div><label>Context window <span class="v" id="cwV"></span></label>'+
+        '<input type="range" id="cw" min="0" max="5" step="1" value="3"></div>'+
+      '<div><label>Pasted document <span class="v" id="docV"></span></label>'+
+        '<input type="range" id="doc" min="0" max="500" step="5" value="120"></div>'+
+      '<div><label>Chat history <span class="v" id="hisV"></span></label>'+
+        '<input type="range" id="his" min="0" max="200" step="2" value="12"></div>'+
+    '</div>'+
+    '<div class="bars" id="cwBars"></div>'+
+    '<div class="legend">'+
+      '<span><i style="background:var(--b3)"></i>History</span>'+
+      '<span><i style="background:var(--b2)"></i>Pasted document</span>'+
+      '<span><i style="background:var(--b1)"></i>Reserved for the answer</span>'+
+      '<span><i style="background:color-mix(in srgb,var(--ink) 10%,transparent)"></i>Free desk space</span>'+
+    '</div>'+
+    '<div class="stats">'+
+      '<div class="stat"><div class="sl">On the desk</div><div class="sv" id="cwUsed">0</div><div class="sn">tokens</div></div>'+
+      '<div class="stat"><div class="sl">Free</div><div class="sv a" id="cwFree">0</div><div class="sn">tokens</div></div>'+
+      '<div class="stat"><div class="sl">Equivalent</div><div class="sv" id="cwPages">0</div><div class="sn">pages of text</div></div>'+
+      '<div class="stat"><div class="sl">Verdict</div><div class="sv" id="cwFit" style="font-size:.95rem">fits</div></div>'+
+    '</div>'+
+    '<div class="note">Roughly 750 words or 1.5 pages per thousand tokens. A document that overflows the window does not '+
+    'produce an error on most platforms: the oldest content is silently dropped, which is why a long chat starts '+
+    'contradicting itself.</div>';
+
+  var v=viz("Visualizer 2","Will it fit on the desk",
+    "Everything the model can see shares one window: your prompt, the history, the pasted file, and the answer it has not written yet.",html);
+  afterHeading("Section 5",v);
+
+  var SIZES=[8000,32000,128000,200000,1000000,2000000];
+  var cw=v.querySelector("#cw"), doc=v.querySelector("#doc"), his=v.querySelector("#his");
+  var bars=v.querySelector("#cwBars");
+
+  function k(n){
+    if(n>=1e6) return (n/1e6).toFixed(n%1e6?1:0)+"M";
+    if(n>=1000) return Math.round(n/1000)+"K";
+    return ""+n;
+  }
+
+  function render(){
+    var win=SIZES[+cw.value];
+    var docTok=+doc.value*1000;
+    var hisTok=+his.value*1000;
+    var sys=800, reserve=4000;
+    var used=sys+hisTok+docTok;
+    var free=win-used-reserve;
+
+    v.querySelector("#cwV").textContent=k(win);
+    v.querySelector("#docV").textContent=k(docTok);
+    v.querySelector("#hisV").textContent=k(hisTok);
+
+    var parts=[
+      {n:"History + system",val:hisTok+sys,c:"var(--b3)"},
+      {n:"Pasted document",val:docTok,c:"var(--b2)"},
+      {n:"Reserved answer",val:reserve,c:"var(--b1)"}
+    ];
+    var rows=parts.map(function(p){
+      var pct=Math.min(100,p.val/win*100);
+      return '<div class="bar"><div class="bl">'+p.n+'</div>'+
+        '<div class="bt"><div class="bf" style="width:'+pct+'%;background:'+p.c+'"></div></div>'+
+        '<div class="bv">'+k(p.val)+'</div></div>';
+    }).join("");
+    var fillPct=Math.min(100,(used+reserve)/win*100);
+    rows+='<div class="bar hi"><div class="bl">Desk in total</div>'+
+      '<div class="bt"><div class="bf" style="width:'+fillPct+'%;background:'+
+      (free<0?"var(--b4)":"linear-gradient(90deg,var(--b3),var(--b2),var(--b1))")+'"></div></div>'+
+      '<div class="bv">'+Math.round(fillPct)+'%</div></div>';
+    bars.innerHTML=rows;
+
+    v.querySelector("#cwUsed").textContent=k(used);
+    var fe=v.querySelector("#cwFree");
+    fe.textContent=free<0?"-"+k(-free):k(free);
+    fe.className="sv "+(free<0?"w":"a");
+    v.querySelector("#cwPages").textContent=Math.round(win/1000*1.5).toLocaleString();
+    var fit=v.querySelector("#cwFit");
+    fit.textContent=free<0?"will truncate":(free<win*0.08?"tight":"fits");
+    fit.className="sv "+(free<0?"w":"a");
+    fit.style.fontSize=".95rem";
+  }
+  [cw,doc,his].forEach(function(i){i.addEventListener("input",render);});
+  render();
+})();
+
+/* ============================================================
+   VISUALIZER 3 - temperature, top-k, top-p
+   ============================================================ */
+(function(){
+  var CANDIDATES=[
+    ["sunny",3.4],["cloudy",2.9],["warm",2.6],["cold",1.9],["perfect",1.4],
+    ["unpredictable",0.9],["mine",0.3],["purple",-0.4],["Tuesday",-1.1],["algorithm",-2.0]
+  ];
+  var PALETTE=["var(--b1)","var(--b2)","var(--b3)","var(--b4)","var(--b5)"];
+
+  var html=
+    '<p style="margin:0 0 14px;font-size:14.5px;color:var(--ink-2)">'+
+      'Prompt: <code>The weather today is</code> &nbsp;&rarr;&nbsp; the model scores every possible next token. '+
+      'These three dials decide which one it actually picks.</p>'+
+    '<div class="ctl three">'+
+      '<div><label>Temperature <span class="v" id="tV">0.7</span></label>'+
+        '<input type="range" id="t" min="0" max="2" step="0.05" value="0.7"></div>'+
+      '<div><label>Top-k <span class="v" id="kV">10</span></label>'+
+        '<input type="range" id="k" min="1" max="10" step="1" value="10"></div>'+
+      '<div><label>Top-p <span class="v" id="pV">1.00</span></label>'+
+        '<input type="range" id="p" min="0.05" max="1" step="0.05" value="1"></div>'+
+    '</div>'+
+    '<div class="bars" id="tBars"></div>'+
+    '<div class="stats">'+
+      '<div class="stat"><div class="sl">Candidates alive</div><div class="sv a" id="tAlive">10</div>'+
+        '<div class="sn">of 10 scored</div></div>'+
+      '<div class="stat"><div class="sl">Top token odds</div><div class="sv" id="tTop">0%</div></div>'+
+      '<div class="stat"><div class="sl">Behaviour</div><div class="sv" id="tMode" style="font-size:.95rem">balanced</div></div>'+
+    '</div>'+
+    '<div class="note" id="tNote"></div>';
+
+  var v=viz("Visualizer 3","Turn the dials, watch the odds move",
+    "A chat window at 0.3 against 0.7 looks identical on camera. The probability distribution does not. Teach from this, not from a chat.",html);
+  afterHeading("Section 6",v);
+
+  var t=v.querySelector("#t"), k=v.querySelector("#k"), p=v.querySelector("#p");
+  var bars=v.querySelector("#tBars");
+
+  function render(){
+    var T=+t.value, K=+k.value, P=+p.value;
+    v.querySelector("#tV").textContent=T.toFixed(2);
+    v.querySelector("#kV").textContent=K;
+    v.querySelector("#pV").textContent=P.toFixed(2);
+
+    // softmax at temperature; T=0 collapses onto the argmax
+    var probs;
+    if(T<0.03){
+      probs=CANDIDATES.map(function(_,i){return i===0?1:0;});
+    }else{
+      var ex=CANDIDATES.map(function(c){return Math.exp(c[1]/T);});
+      var sum=ex.reduce(function(a,b){return a+b;},0);
+      probs=ex.map(function(e){return e/sum;});
+    }
+
+    // top-k then top-p filtering, then renormalise
+    var kept=probs.map(function(pr,i){return {i:i,pr:i<K?pr:0};});
+    var run=0, cut=kept.length;
+    for(var i=0;i<kept.length;i++){
+      if(kept[i].pr===0) continue;
+      run+=kept[i].pr;
+      if(run>=P){ cut=i+1; break; }
+    }
+    kept.forEach(function(o,i){ if(i>=cut) o.pr=0; });
+    var tot=kept.reduce(function(a,b){return a+b.pr;},0)||1;
+    kept.forEach(function(o){o.pr=o.pr/tot;});
+
+    var alive=kept.filter(function(o){return o.pr>0.0005;}).length;
+    var max=Math.max.apply(null,kept.map(function(o){return o.pr;}))||1;
+
+    bars.innerHTML=CANDIDATES.map(function(c,i){
+      var pr=kept[i].pr, dead=pr<=0.0005;
+      return '<div class="bar'+(i===0?' hi':'')+'" style="opacity:'+(dead?0.3:1)+'">'+
+        '<div class="bl"><code style="border:0;background:none;padding:0">'+c[0]+'</code></div>'+
+        '<div class="bt"><div class="bf" style="width:'+(dead?0:Math.max(1.5,pr/max*100))+'%;background:'+PALETTE[i%5]+'"></div></div>'+
+        '<div class="bv">'+(dead?"blocked":(pr*100).toFixed(1)+"%")+'</div></div>';
+    }).join("");
+
+    v.querySelector("#tAlive").textContent=alive;
+    v.querySelector("#tTop").textContent=(kept[0].pr*100).toFixed(1)+"%";
+
+    var mode,note;
+    if(K===1){
+      mode="locked"; note="Top-k is 1, so there is only ever one candidate. Temperature now changes nothing at all. This is the point to make live: a single dial can override another completely.";
+    }else if(T<0.15){
+      mode="deterministic"; note="Near zero temperature: the model takes the top token almost every time. Same input, same output. This is what you want for extraction, classification and anything a compliance team will ask about.";
+    }else if(T<0.8){
+      mode="balanced"; note="A workable default. The leading token still dominates, but a few alternatives stay in play, so phrasing varies while the substance does not.";
+    }else if(T<1.4){
+      mode="creative"; note="The distribution is flattening. Unlikely tokens become reachable, which is what you want for naming, brainstorming and copy, and not what you want for a SQL query.";
+    }else{
+      mode="erratic"; note="Very high temperature pulls genuinely implausible tokens into contention. Output stops being reliable. Note that top-p is the better tool for controlling this than temperature alone.";
+    }
+    if(P<0.5&&K>1){
+      note+=" Top-p at "+P.toFixed(2)+" is doing most of the filtering here: it keeps only the smallest set of tokens whose odds add up to "+P.toFixed(2)+", so it tightens automatically when the model is confident and loosens when it is not.";
+    }
+    v.querySelector("#tMode").textContent=mode;
+    v.querySelector("#tMode").style.fontSize=".95rem";
+    v.querySelector("#tNote").textContent=note;
+  }
+  [t,k,p].forEach(function(i){i.addEventListener("input",render);});
+  render();
+})();
+
+/* ============================================================
+   VISUALIZER 4 - self-supervision, fill in the blank
+   ============================================================ */
+(function(){
+  var ROUNDS=[
+    {s:["The barista handed me a hot cup of ","."],ans:"coffee",
+     opts:["coffee","gravel","Thursday","silence"],
+     knew:["what a barista does","what is served hot","what fits in a cup","what usually follows that phrasing"]},
+    {s:["She forgot her umbrella, so she arrived completely ","."],ans:"soaked",
+     opts:["soaked","delighted","rectangular","early"],
+     knew:["that umbrellas are for rain","cause and effect across a clause","that 'so' signals a consequence","which adjectives describe a person"]},
+    {s:["He put the milk back in the ","."],ans:"fridge",
+     opts:["fridge","oven","wallet","argument"],
+     knew:["where milk is kept","that 'back in' implies it came from there","which nouns are containers","everyday household routine"]}
+  ];
+
+  var html=
+    '<div class="seg" id="ssSeg" style="margin-bottom:14px"></div>'+
+    '<div style="font-size:1.15rem;line-height:1.7;padding:16px 18px;background:var(--paper);border:1px solid var(--rule);border-radius:9px;margin-bottom:14px" id="ssSent"></div>'+
+    '<div class="seg" id="ssOpts" style="margin-bottom:4px"></div>'+
+    '<div id="ssOut" style="margin-top:14px"></div>'+
+    '<div class="note">No human labelled any of this. The answer was already in the sentence, which is why the whole internet '+
+    'can be turned into practice questions for free.</div>';
+
+  var v=viz("Visualizer 4","Be the model for a second",
+    "Guess the hidden word. Then look at what you had to know in order to guess it.",html);
+  afterHeading("Section 4",v);
+
+  var cur=0, picked=null;
+
+  function render(){
+    v.querySelector("#ssSeg").innerHTML=ROUNDS.map(function(_,i){
+      return '<button data-i="'+i+'"'+(i===cur?' class="on"':'')+'>Sentence '+(i+1)+'</button>';
+    }).join("");
+    Array.prototype.slice.call(v.querySelectorAll("#ssSeg button")).forEach(function(b){
+      b.addEventListener("click",function(){ cur=+b.dataset.i; picked=null; render(); });
+    });
+
+    var r=ROUNDS[cur];
+    v.querySelector("#ssSent").innerHTML=
+      r.s[0]+'<span style="display:inline-block;min-width:118px;text-align:center;border-bottom:2px solid '+
+      (picked?(picked===r.ans?"var(--accent)":"var(--rose)"):"var(--ink-3)")+';font-weight:650;color:'+
+      (picked?(picked===r.ans?"var(--accent)":"var(--rose)"):"var(--ink-3)")+'">'+
+      (picked||"&nbsp;")+'</span>'+r.s[1];
+
+    v.querySelector("#ssOpts").innerHTML=r.opts.map(function(o){
+      var cls=picked?(o===r.ans?" class=\"on\"":""):"";
+      return '<button data-o="'+o+'"'+cls+(picked?' disabled style="opacity:'+(o===r.ans||o===picked?1:.45)+'"':'')+'>'+o+'</button>';
+    }).join("");
+    Array.prototype.slice.call(v.querySelectorAll("#ssOpts button")).forEach(function(b){
+      b.addEventListener("click",function(){ picked=b.dataset.o; render(); });
+    });
+
+    var out=v.querySelector("#ssOut");
+    if(!picked){
+      out.innerHTML='<div class="note" style="border-top:1px dashed var(--rule-2)">Pick the word you think fills the blank.</div>';
+      return;
+    }
+    var right=picked===r.ans;
+    out.innerHTML=
+      '<div class="lbl '+(right?"ask":"important")+'" style="margin:0 0 9px"><span class="tag">'+
+      (right?"That is the one":"The usual answer is “"+r.ans+"”")+'</span>'+
+      'You did what the model does billions of times. To land on that word you had to already know:</div>'+
+      '<div class="bars">'+r.knew.map(function(k,i){
+        return '<div class="bar"><div class="bl" style="white-space:normal">'+k+'</div>'+
+          '<div class="bt"><div class="bf" style="width:100%;background:var(--b'+((i%5)+1)+')"></div></div>'+
+          '<div class="bv">learned</div></div>';
+      }).join("")+'</div>'+
+      '<div class="lbl important" style="margin-top:12px"><span class="tag">And the catch</span>'+
+      'Nobody taught it any of that directly. It fell out of getting good at filling blanks. Which is also why, when it '+
+      'does not know, it still produces the most plausible-sounding filler rather than stopping. That is the failure '+
+      'mode Class 3 is built around.</div>';
+  }
+  render();
+})();
+
+/* ============================================================
+   VISUALIZER 5 - the swappable brain
+   ============================================================ */
+(function(){
+  var P={
+    groq:{n:"Groq",model:"openai/gpt-oss-120b",key:"GROQ_API_KEY",
+      base:'base_url="https://api.groq.com/openai/v1",',
+      fam:"Open weights",cost:"free tier",speed:5,ctx:"128K",
+      note:"A free key with no billing details, serving open-weight models very fast. gpt-oss is OpenAI's open-weight model, so the weights are public and Groq runs them. This is the default for this module, so nobody has to pay to follow along."},
+    openai:{n:"OpenAI",model:"gpt-4o-mini",key:"OPENAI_API_KEY",
+      base:"# no base_url -- this is the library's default",
+      fam:"GPT",cost:"needs credit",speed:4,ctx:"128K",
+      note:"The library's home provider, so the base_url line disappears entirely. Needs billing credit, which is why it is optional today."},
+    anthropic:{n:"Anthropic",model:"claude-sonnet-4-6",key:"ANTHROPIC_API_KEY",
+      base:'base_url="https://api.anthropic.com/v1/",',
+      fam:"Claude",cost:"needs credit",speed:3,ctx:"200K",
+      note:"Strong on instruction following and long documents. Same message shape, same way of reading the reply."},
+    google:{n:"Google",model:"gemini-2.5-flash",key:"GEMINI_API_KEY",
+      base:'base_url="https://generativelanguage.googleapis.com/v1beta/openai/",',
+      fam:"Gemini",cost:"free tier",speed:5,ctx:"1M",
+      note:"The largest context of the four, and a free tier of its own. Useful when you are feeding in something very long."}
+  };
+
+  var html=
+    '<div class="seg" id="swSeg" style="margin-bottom:14px"></div>'+
+    '<div class="ctl"><div><label>Your code <span class="v" id="swV"></span></label>'+
+      '<pre style="margin:0;white-space:pre-wrap;font-size:12.5px"><code id="swCode"></code></pre></div></div>'+
+    '<div class="stats">'+
+      '<div class="stat"><div class="sl">Family</div><div class="sv" id="swF" style="font-size:.95rem">-</div></div>'+
+      '<div class="stat"><div class="sl">To get started</div><div class="sv" id="swC" style="font-size:.95rem">-</div></div>'+
+      '<div class="stat"><div class="sl">Context</div><div class="sv" id="swX">-</div></div>'+
+      '<div class="stat"><div class="sl">Lines that changed</div><div class="sv a" id="swL">0</div><div class="sn">out of the whole file</div></div>'+
+    '</div>'+
+    '<div class="note" id="swN"></div>';
+
+  var v=viz("Visualizer 5","Change the brain, keep the app",
+    "The same file on four different providers. Watch how little moves, and notice what never moves at all.",html);
+  afterHeading("The brain is swappable",v);
+
+  var cur="groq";
+  function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;");}
+
+  function render(){
+    v.querySelector("#swSeg").innerHTML=Object.keys(P).map(function(k){
+      return '<button data-k="'+k+'"'+(k===cur?' class="on"':'')+'>'+P[k].n+'</button>';
+    }).join("");
+    Array.prototype.slice.call(v.querySelectorAll("#swSeg button")).forEach(function(b){
+      b.addEventListener("click",function(){ cur=b.dataset.k; render(); });
+    });
+
+    var p=P[cur];
+    var code=
+      'client = OpenAI(\n'+
+      '    api_key=os.getenv("'+p.key+'"),\n'+
+      '    '+p.base+'\n'+
+      ')\n\n'+
+      'response = client.chat.completions.create(\n'+
+      '    model="'+p.model+'",\n'+
+      '    temperature=0.2,\n'+
+      '    messages=[\n'+
+      '        {"role": "system", "content": "You are a witty travel guide."},\n'+
+      '        {"role": "user",   "content": "Suggest one thing to do in Bangalore."},\n'+
+      '    ],\n'+
+      ')\n\n'+
+      'print(response.choices[0].message.content)';
+
+    // highlight only the three provider-specific lines
+    var MARK='<mark style="background:color-mix(in srgb,var(--b2) 32%,transparent);color:inherit;border-radius:3px">';
+    function hl(src,frag){ return frag?src.replace(frag,MARK+frag+'</mark>'):src; }
+    var html=esc(code);
+    html=hl(html,'api_key=os.getenv("'+p.key+'"),');
+    html=hl(html,esc(p.base));
+    html=hl(html,'model="'+p.model+'",');
+
+    v.querySelector("#swCode").innerHTML=html;
+    v.querySelector("#swV").textContent=p.n;
+    v.querySelector("#swF").textContent=p.fam;
+    v.querySelector("#swF").style.fontSize=".95rem";
+    var c=v.querySelector("#swC");
+    c.textContent=p.cost;
+    c.className="sv "+(p.cost==="free tier"?"a":"w");
+    c.style.fontSize=".95rem";
+    v.querySelector("#swX").textContent=p.ctx;
+    v.querySelector("#swL").textContent=cur==="openai"?"2":"3";
+
+    v.querySelector("#swN").textContent=p.note+
+      " What never moves: the library, the three roles, the message list, and the way you read the reply. "+
+      "That is the whole argument for learning the four families rather than memorising model names.";
+  }
+  render();
+})();
+
+/* ============================================================
+   VISUALIZER 6 - build the messages list
+   ============================================================ */
+(function(){
+  var SYS={
+    guide:{label:"witty travel guide",text:"You are a witty travel guide.",
+      reply:"One thing in Bangalore? Cubbon Park on a Sunday morning, when they shut the roads to cars. You get a hundred acres of shade, questionable street coffee, and the only two hours all week when the city is quieter than you are."},
+    tax:{label:"tax inspector",text:"You are a weary tax inspector who answers everything as if filing a form.",
+      reply:"ITEM 1. Recommended activity: Cubbon Park, Bengaluru. Category: public recreation, non-taxable. Duration: 2 hours (approx). Supporting documentation: none required. Please retain receipts for any refreshments purchased on site."},
+    kid:{label:"explains to a ten-year-old",text:"You explain things to a ten-year-old. Short sentences, no long words.",
+      reply:"Go to Cubbon Park! It is a really big park in the middle of the city. On Sunday mornings they do not let cars in. So you can run around in the road, which is normally not allowed. There are big old trees too."},
+    none:{label:"no system message",text:"",
+      reply:"Bangalore offers a variety of attractions for visitors. One popular option is Cubbon Park, a large green space in the city centre that is well suited to walking and relaxation. Other notable options include Lalbagh Botanical Garden, the Bangalore Palace, and various shopping and dining districts throughout the city."}
+  };
+
+  var html=
+    '<div class="seg" id="msSeg" style="margin-bottom:6px"></div>'+
+    '<div class="note" style="border:0;padding:0;margin:0 0 14px">Change only the system line. Everything else stays identical.</div>'+
+    '<div class="ctl two">'+
+      '<div><label>The messages list you send</label>'+
+        '<pre style="margin:0;white-space:pre-wrap;font-size:12.5px;min-height:170px"><code id="msCode"></code></pre></div>'+
+      '<div><label>What comes back</label>'+
+        '<pre style="margin:0;white-space:pre-wrap;font-size:12.5px;min-height:170px"><code id="msOut"></code></pre></div>'+
+    '</div>'+
+    '<div class="seg" style="margin:14px 0"><button id="msHist">Add the reply back and ask a follow-up</button></div>'+
+    '<div class="note" id="msN"></div>';
+
+  var v=viz("Visualizer 6","One line decides what your product is",
+    "The three roles, and what happens when you change the only line you control. Recorded replies; run it yourself in the cell above.",html);
+  afterHeading("The three roles",v);
+
+  var cur="guide", hist=false;
+  function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;");}
+
+  function render(){
+    v.querySelector("#msSeg").innerHTML=Object.keys(SYS).map(function(k){
+      return '<button data-k="'+k+'"'+(k===cur?' class="on"':'')+'>'+SYS[k].label+'</button>';
+    }).join("");
+    Array.prototype.slice.call(v.querySelectorAll("#msSeg button")).forEach(function(b){
+      b.addEventListener("click",function(){ cur=b.dataset.k; render(); });
+    });
+
+    var s=SYS[cur];
+    var lines=["messages=["];
+    if(s.text) lines.push('    {"role": "system",    "content": "'+s.text+'"},');
+    lines.push('    {"role": "user",      "content": "Suggest one thing to do in Bangalore."},');
+    if(hist){
+      lines.push('    {"role": "assistant", "content": "<the whole reply you just got>"},');
+      lines.push('    {"role": "user",      "content": "Is it free?"},');
+    }
+    lines.push("]");
+
+    v.querySelector("#msCode").innerHTML=esc(lines.join("\n"));
+    v.querySelector("#msOut").innerHTML=esc(
+      hist ? "Yes, Cubbon Park is free. No ticket, no entry fee, open to anyone."
+           : s.reply);
+
+    v.querySelector("#msN").textContent = hist
+      ? "To ask a follow-up you resend the entire list, including the model's own previous reply as an assistant message. There is no other mechanism. Every chat interface you have used is doing exactly this behind the scenes, which is why a long conversation eventually runs out of desk space."
+      : (cur==="none"
+        ? "With no system message you get the generic, hedging, list-everything answer. It is not wrong. It is just nobody's product. Everything that makes an AI feature feel designed lives in the line you just deleted."
+        : "Same model, same user message, same temperature. One line changed and the product changed with it. That line is what Class 2 is entirely about.");
+  }
+
+  v.querySelector("#msHist").addEventListener("click",function(){
+    hist=!hist;
+    this.classList.toggle("on",hist);
+    this.textContent=hist?"Back to a single turn":"Add the reply back and ask a follow-up";
+    render();
+  });
+  render();
+})();
+
+/* ============================================================
+   5. table of contents and scroll state
+   ============================================================ */
+(function(){
+  var hs=Array.prototype.slice.call(host.querySelectorAll("h2"));
+  var toc=document.getElementById("toc");
+
+  hs.forEach(function(h,i){
+    if(!h.id) h.id="s"+i;
+    var label=h.dataset.label||h.textContent.trim();
+    var mins=h.dataset.mins||"";
+    var a=document.createElement("a");
+    a.href="#"+h.id;
+    a.innerHTML=label+(mins?'<span class="mins">'+mins+'m</span>':'');
+    toc.appendChild(a);
+  });
+
+  var links=Array.prototype.slice.call(toc.querySelectorAll("a"));
+  if("IntersectionObserver" in window){
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(!e.isIntersecting) return;
+        links.forEach(function(l){
+          l.classList.toggle("active",l.getAttribute("href")==="#"+e.target.id);
+        });
+      });
+    },{rootMargin:"-10% 0px -80% 0px"});
+    hs.forEach(function(h){io.observe(h);});
+  }
+})();
+
+})();
+</script>
+</body>
+</html>
